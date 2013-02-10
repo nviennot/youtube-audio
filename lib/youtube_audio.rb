@@ -8,7 +8,7 @@ class YoutubeAudio < Goliath::API
     end
 
     def self.cmd(url)
-      "sh -c \"curl '#{url}' 2>/dev/null | ffmpeg -i - -vn -c:a copy -f webm - 2> /dev/null\""
+      "sh -c \"curl '#{url}' 2>/dev/null | ffmpeg -i - -vn -f mp3 - 2> /dev/null\""
     end
 
     def receive_data(data)
@@ -27,8 +27,8 @@ class YoutubeAudio < Goliath::API
   end
 
   def response(env)
-    video_url = Url.new(params['v']).video_url
     logger.info "Fetching video=#{params['v']}"
+    video_url = Url.new(params['v']).video_url
     logger.debug "link: #{video_url}"
 
     decoder = EventMachine.popen(AudioCoder.cmd(video_url), AudioCoder, env)
@@ -39,6 +39,8 @@ class YoutubeAudio < Goliath::API
       end
     end
 
-    [200, {}, Goliath::Response::STREAMING]
+    [200, {'Content-Type' => 'audio/mp3'}, Goliath::Response::STREAMING]
+  rescue
+    [500, {}, 'we oopsed']
   end
 end
