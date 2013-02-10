@@ -1,5 +1,37 @@
+require 'em-synchrony/em-http'
+
+require 'capybara'
+require 'capybara/dsl'
+require 'headless'
+
+Capybara.javascript_driver = :selenium
+Capybara.current_driver = :selenium
+Capybara.app_host = 'http://www.youtube.com'
+Capybara.default_selector = :css
+
 class YoutubeAudio::Url
-  def to_s
-    'http://r11---sn-hp576ned.c.youtube.com/videoplayback?id=fb23567d17da1cf5&cp=U0hVRVRUUV9HT0NONV9MTlVHOjNlVkU5bE41eWVo&upn=-5EjeRCUax0&mt=1360470251&sparams=cp%2Cid%2Cip%2Cipbits%2Citag%2Cratebypass%2Csource%2Cupn%2Cexpire&mv=m&expire=1360493625&sver=3&fexp=906072%2C919360%2C914055%2C916613%2C900305%2C920704%2C912806%2C902000%2C922403%2C922405%2C929901%2C913605%2C925710%2C929114%2C925006%2C920201%2C930101%2C911116%2C926403%2C910221%2C901451%2C919114&itag=43&ipbits=8&ratebypass=yes&ms=au&ip=69.204.246.183&key=yt1&source=youtube&newshard=yes&cpn=erzDIVUhl25rORR9&signature=9B94CDE769208044C712F20C7F12D5B903BCACDB.A180002E7E4F21D80051B8807CBE5FE639E6E947&ptk=UtBIG3dcVQIMQKQnaQZL5w&oid=6jDR-bM6YcQbNAwwAhgc9A&ptchn=UtBIG3dcVQIMQKQnaQZL5w&pltype=content'
+  include Capybara::DSL
+
+  def initialize(id)
+    @id = id
+  end
+
+  @@headless_started = nil
+  def ensure_headless
+    return if @@headless_started
+    headless = Headless.new(:display => Process.pid, :reuse => true)
+    headless.start
+    @@headless_started = true
+  end
+
+  def video_url
+    ensure_headless
+    visit "/html5"
+    page.find('#html5-join-link a').click
+    sleep 0.1 until page.find('#html5-join-link a').text =~ /Leave/
+    visit "/watch?v=#{@id}"
+    url = page.find('video')['src']
+    page.driver.reset!
+    url
   end
 end
