@@ -2,10 +2,10 @@ require 'em-synchrony/em-http'
 
 require 'capybara'
 require 'capybara/dsl'
-require 'headless'
+require 'capybara/poltergeist'
 
-Capybara.javascript_driver = :selenium
-Capybara.current_driver = :selenium
+Capybara.javascript_driver = :poltergeist
+Capybara.current_driver = :poltergeist
 Capybara.app_host = 'http://www.youtube.com'
 Capybara.default_selector = :css
 
@@ -14,14 +14,6 @@ class YoutubeAudio::Url
 
   def initialize(id)
     @id = id
-  end
-
-  @@headless_started = nil
-  def ensure_headless
-    return if @@headless_started
-    headless = Headless.new(:display => Process.pid, :reuse => true)
-    headless.start
-    @@headless_started = true
   end
 
   def video_url
