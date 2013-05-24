@@ -40,7 +40,7 @@ class YoutubeAudio < Goliath::API
     end
 
     [200, {'Content-Type' => 'audio/mp3'}, Goliath::Response::STREAMING]
-  rescue
-    [500, {}, 'we oopsed']
+  #rescue
+    #[500, {}, 'we oopsed']
   end
 end

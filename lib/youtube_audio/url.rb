@@ -1,29 +1,25 @@
-require 'em-synchrony/em-http'
+require 'cgi'
+require 'open-uri'
 
-require 'capybara'
-require 'capybara/dsl'
-require 'capybara/poltergeist'
 
-Capybara.javascript_driver = :poltergeist
-Capybara.current_driver = :poltergeist
-Capybara.app_host = 'http://www.youtube.com'
-Capybara.default_selector = :css
 
 class YoutubeAudio::Url
-  include Capybara::DSL
 
   def initialize(id)
     @id = id
   end
 
   def video_url
-    ensure_headless
-    visit "/html5"
-    page.find('#html5-join-link a').click
-    sleep 0.1 until page.find('#html5-join-link a').text =~ /Leave/
-    visit "/watch?v=#{@id}"
-    url = page.find('video')['src']
-    page.driver.reset!
-    url
+    #todo - avoid hitting disk
+    info = open(info_url).readline
+    formats = CGI::parse(info)["adaptive_fmts"][0]
+    first_url = CGI::parse(formats)["url"][0]
+    first_url
+  end
+
+  private
+
+  def info_url
+    "http://www.youtube.com/get_video_info?video_id=#{@id}"
   end
 end
