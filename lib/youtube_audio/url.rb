@@ -1,8 +1,6 @@
 require 'cgi'
 require 'open-uri'
 
-
-
 class YoutubeAudio::Url
 
   def initialize(id)
