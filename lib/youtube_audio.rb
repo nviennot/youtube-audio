@@ -17,7 +17,6 @@ class YoutubeAudio < Goliath::API
 
       #ffmpeg is converting this data to mp3
       #-vn means disable video recording
-      "sh -c \"echo test\""
     end
 
     #EM#receive_data - Generally called by the event loop whenever data has been received by the network connection, but since we are using popen, it will be called whenever data is received by the process
@@ -41,15 +40,17 @@ class YoutubeAudio < Goliath::API
     #shouldn't unbind only get called by the framework, not the user?
 
     #when the connection is closed, call unbind in the EM class
-    env['decoder'].try(:unbind) rescue nil
+    #env['decoder'].try(:unbind) rescue nil
   end
 
   def response(env)
+    #chrome is making an extra request after the first connection is closed.  this hack fixes that.  WTF?
+    #some times two extra requests, when streaming audio
     @i ||= 0
     @i += 1
     puts "request #{@i}"
     #puts "Fetching video=#{params['v']}"
-    video_url = Url.new(params['v']).video_url
+    #video_url = Url.new(params['v']).video_url
     #puts "link: #{video_url}"
     #puts AudioCoder.cmd(video_url)
     #for some reason this causes several requests to be made
@@ -78,6 +79,7 @@ class YoutubeAudio < Goliath::API
     #end
 
     [200, {}, Goliath::Response::STREAMING]
+    #[200, {'Content-Type' => 'audio/mp3'}, Goliath::Response::STREAMING]
   #rescue
     #[500, {}, 'we oopsed']
   end
