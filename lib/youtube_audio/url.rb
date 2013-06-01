@@ -11,8 +11,8 @@ class YoutubeAudio::Url
     #todo - avoid hitting disk
     info = open(info_url).readline
     formats = CGI::parse(info)["adaptive_fmts"][0]
-    first_url = CGI::parse(formats)["url"][0]
-    first_url
+    audio_stream_url = CGI::parse(formats)["url"][3]
+    audio_stream_url
   end
 
   private
